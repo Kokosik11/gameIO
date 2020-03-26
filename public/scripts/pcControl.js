@@ -1,32 +1,30 @@
 // Экспорт элементов из html
 let playerField = document.getElementById("playerField");
-let player = document.getElementById("player");
 let coordsField = document.getElementById("coords");
 let gameField = document.getElementById("gameField");
 
+let player = new Player();
+let bulletCount = 0;
 // Получаем информацию стилей элемента
 let gameFieldStyle = window.getComputedStyle(gameField);
 let bodyStyles = window.getComputedStyle(document.body);
-let playerStyles = window.getComputedStyle(player);
+let playerStyles = window.getComputedStyle(player.objectID);
 
-// Функция, вызываемая после зажатия ЛКМ (mousedown)
+let leftField = parseInt(gameFieldStyle.marginLeft) + 25;
+let rightField = parseInt(bodyStyles.width) - leftField * 2;
+
 function mouseDownEvent() {
-    addEventListener("mousemove", gameMouse); // Вызывает gameMouse() при движении мыши (mousemove)
+    addEventListener("mousemove", gameMouse);
 }
 
-// Функция, вызываемая после отжатия ЛКМ (mouseUp)
 function mouseUpEvent() {
-    removeEventListener("mousemove", gameMouse); // Сбрасывает событие, вызываемое движением мыши (mousemove)
-    // Мягко говоря, эта функция останавливает движение объекта #player
+    removeEventListener("mousemove", gameMouse);
 }
 
-/****************************************************/
-/************ События и функции для пуль ************/
 let bulTimer;
 function createBullet() {
-    let bullet = document.createElement("div");
-    bullet.setAttribute("id", "bullet");
-    gameField.append(bullet);
+    let bullet = new Bullet(bulletCount++);
+    bullet.Spawn(player);
 }
 
 function setBulletInterval() {
@@ -35,33 +33,16 @@ function setBulletInterval() {
 
 function removeBulletInterval() {
     bulTimer = clearInterval(bulTimer);
-    //removeEventListener("mousedown", setBulletInterval);
 }
 
-/****************************************************/
-/****************************************************/
-// Главная функция, вызываемая после зажатия ЛКМ и движении мыши (mouseDown + mousemove)
+let timer;
+
 function gameMouse(e) {
-    let leftField = parseInt(gameFieldStyle.marginLeft) + 25; // Определяем размер пустого пространства слева
-    let rightField = parseInt(bodyStyles.width) - leftField * 2; // Размер слева
-
-    let matrix = new WebKitCSSMatrix(playerStyles.webkitTransform); // Вытаскиваем из стиля "transform" инфу о расположении #player (translateX)
-
-    //alert(matrix.m41);
-
-    let mouseX = e.clientX - leftField; // вычисляем позицию мыши.
-    // Для упрощения отнимаем размер левого поля.
-    // Теперь наши координаты мыши начинаются не с 600, а с 0
-
-    // coordsField.innerHTML = mouseX;  // Координаты
+    let mouseX = e.clientX - leftField;
 
     if (mouseX > 0 && mouseX < rightField) {
-        // Условие, которое не позволяет выходить из границ игрового поля
-        player.style.transform = "translateX(" + mouseX + "px) rotate(-43deg)"; // Если мы в игровом поле, то перемешаем наш #player
+        player.MoveTo(10, mouseX);
     }
-    // if (mouseX > matrix + 15) {          // А это недоделаное условие для покачивания #player в сторону курсора. Над ним надо подумать...
-    //     player.style.transform = "translateX(" + mouseX + "px) rotate(-30deg)";
-    // }
 }
 
 // События
